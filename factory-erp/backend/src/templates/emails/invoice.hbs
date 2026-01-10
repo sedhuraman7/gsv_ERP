@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+
+        .header {
+            background: #f97316;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .invoice-details {
+            background: #f8fafc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .amount {
+            font-size: 24px;
+            color: #f97316;
+            font-weight: bold;
+        }
+
+        .button {
+            background: #f97316;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Invoice Generated</h2>
+        </div>
+        <div class="content">
+            <p>Dear {{customerName}},</p>
+            <p>Please find attached the invoice for your recent order.</p>
+
+            <div class="invoice-details">
+                <p><strong>Invoice No:</strong> {{invoiceNo}}</p>
+                <p><strong>Date:</strong> {{invoiceDate}}</p>
+                <p><strong>Amount:</strong> <span class="amount">{{invoiceAmount}}</span></p>
+            </div>
+
+            <p>You can pay online using the link below:</p>
+            <a href="{{paymentLink}}" class="button">Pay Now</a>
+        </div>
+        <div class="footer">
+            <p>Thank you for your business!</p>
+            © {{year}} {{companyName}}
+        </div>
+    </div>
+</body>
+
+</html>

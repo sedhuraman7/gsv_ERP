@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            color: #333;
+        }
+
+        .header {
+            background: #10b981;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .details {
+            background: #f0fdf4;
+            padding: 20px;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Production Order Completed</h2>
+        </div>
+        <div class="content">
+            <p>Production order <strong>#{{orderNo}}</strong> has been successfully completed.</p>
+
+            <div class="details">
+                <h3>Order Summary</h3>
+                <p><strong>Product:</strong> {{productName}}</p>
+                <p><strong>Quantity Produced:</strong> {{quantity}} units</p>
+                <p><strong>Completed By:</strong> {{completedBy}}</p>
+                <p><strong>Completion Time:</strong> {{completionDate}}</p>
+            </div>
+
+            <p>The finished goods have been moved to the storage area.</p>
+            <a href="{{dashboardUrl}}" style="color: #10b981; font-weight: bold;">View Production Details &rarr;</a>
+        </div>
+        <div class="footer">
+            © {{year}} {{companyName}}
+        </div>
+    </div>
+</body>
+
+</html>

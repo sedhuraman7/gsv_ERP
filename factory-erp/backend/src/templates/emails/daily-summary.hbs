@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            color: #333;
+        }
+
+        .header {
+            background: #6366f1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .label {
+            color: #666;
+        }
+
+        .value {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Daily Operations Summary</h2>
+            <p>{{date}}</p>
+        </div>
+        <div class="content">
+            <h3>Key Performance Metrics</h3>
+
+            <div class="metric">
+                <span class="label">Total Sales</span>
+                <span class="value">{{totalSales}}</span>
+            </div>
+
+            <div class="metric">
+                <span class="label">Production Output</span>
+                <span class="value">{{totalProduction}} units</span>
+            </div>
+
+            <div class="metric">
+                <span class="label">Low Stock Items</span>
+                <span class="value" style="color: #ef4444;">{{lowStockItems}}</span>
+            </div>
+
+            <div class="metric">
+                <span class="label">Pending Payments</span>
+                <span class="value">{{pendingPayments}}</span>
+            </div>
+
+            <br>
+            <a href="{{dashboardUrl}}" class="button"
+                style="text-align: center; display: block; background: #6366f1; color: white; padding: 10px; text-decoration: none;">Open
+                Dashboard</a>
+        </div>
+        <div class="footer">
+            © {{year}} {{companyName}} - Daily Processing
+        </div>
+    </div>
+</body>
+
+</html>
