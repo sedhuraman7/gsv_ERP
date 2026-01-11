@@ -31,7 +31,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/factory_erp')
+// Database Connection
+const dbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/factory_erp';
+console.log('🔌 Attempting to connect to DB:', dbUri.includes('mongodb+srv') ? 'MongoDB Atlas (Cloud)' : 'Local MongoDB');
+
+mongoose.connect(dbUri)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 

@@ -24,6 +24,7 @@ const BillingSystem: React.FC = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newInvoice, setNewInvoice] = useState({
         customerName: '',
+        customerId: '',
         gstin: '',
         status: 'pending',
         date: new Date().toISOString().split('T')[0],
@@ -80,6 +81,7 @@ const BillingSystem: React.FC = () => {
                 fetchInvoices();
                 setNewInvoice({
                     customerName: '',
+                    customerId: '',
                     gstin: '',
                     status: 'pending',
                     date: new Date().toISOString().split('T')[0],
@@ -96,6 +98,19 @@ const BillingSystem: React.FC = () => {
     };
 
     const [products, setProducts] = useState<any[]>([]);
+    const [customers, setCustomers] = useState<any[]>([]);
+
+    const fetchCustomers = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/customers');
+            if (response.ok) {
+                const data = await response.json();
+                setCustomers(data);
+            }
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -161,6 +176,7 @@ const BillingSystem: React.FC = () => {
     React.useEffect(() => {
         fetchInvoices();
         fetchProducts();
+        fetchCustomers(); // Fetch customers
         fetchDeliveryMen();
     }, []);
 
@@ -370,13 +386,25 @@ const BillingSystem: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Customer Name</label>
-                                    <input
-                                        type="text"
+                                    <select
                                         className="input-field"
                                         required
-                                        value={newInvoice.customerName}
-                                        onChange={(e) => setNewInvoice({ ...newInvoice, customerName: e.target.value })}
-                                    />
+                                        value={newInvoice.customerId || ''}
+                                        onChange={(e) => {
+                                            const cust = customers.find(c => c._id === e.target.value);
+                                            setNewInvoice({
+                                                ...newInvoice,
+                                                customerId: e.target.value,
+                                                customerName: cust ? cust.name : '',
+                                                gstin: cust ? (cust.gstNumber || '') : ''
+                                            });
+                                        }}
+                                    >
+                                        <option value="">Select Customer</option>
+                                        {customers.map(c => (
+                                            <option key={c._id} value={c._id}>{c.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">GSTIN</label>

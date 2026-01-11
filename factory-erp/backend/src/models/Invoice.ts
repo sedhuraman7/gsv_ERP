@@ -42,6 +42,7 @@ export interface IInvoice extends Document {
     grandTotal: number;
     paymentMode: 'cash' | 'cheque' | 'online' | 'credit';
     paymentStatus: 'paid' | 'pending' | 'partial';
+    deliveryStatus: 'pending' | 'assigned' | 'shipped' | 'delivered' | 'returned' | 'failed';
     amountPaid: number;
     balanceDue: number;
     dispatchThrough?: string;
@@ -206,6 +207,11 @@ const InvoiceSchema: Schema = new Schema({
     paymentStatus: {
         type: String,
         enum: ['paid', 'pending', 'partial'],
+        default: 'pending'
+    },
+    deliveryStatus: {
+        type: String,
+        enum: ['pending', 'assigned', 'shipped', 'delivered', 'returned', 'failed'],
         default: 'pending'
     },
     amountPaid: {

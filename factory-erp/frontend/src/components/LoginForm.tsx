@@ -335,7 +335,7 @@ const LoginForm: React.FC = () => {
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    type="text"
+                                    type={showPassword ? 'text' : 'password'}
                                     placeholder="••••••••"
                                     {...register('password')}
                                     className="input-field pl-10 pr-10"

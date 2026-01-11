@@ -44,6 +44,14 @@ const users = [
         role: 'accounts',
         department: 'accounts',
         password: 'password123'
+    },
+    {
+        employeeId: 'DELIVERY001',
+        name: 'Fast Delivery Man',
+        email: 'delivery@factory.com',
+        role: 'delivery_man',
+        department: 'logistics',
+        password: 'password123'
     }
 ];
 

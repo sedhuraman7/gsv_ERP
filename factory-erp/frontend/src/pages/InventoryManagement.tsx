@@ -12,7 +12,8 @@ import {
     Eye,
     BarChart3,
     RefreshCw,
-    Scan
+    Scan,
+    ArrowRightLeft
 } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
@@ -25,6 +26,7 @@ const InventoryManagement: React.FC = () => {
     const [inventoryItems, setInventoryItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showTransferModal, setShowTransferModal] = useState(false);
     const [showScanner, setShowScanner] = useState(false);
 
     // New State for Edit Mode
@@ -38,6 +40,7 @@ const InventoryManagement: React.FC = () => {
         currentStock: 0,
         minStockLevel: 0,
         maxStockLevel: 0,
+        price: 0, // Added price field
         type: 'raw' // 'raw' or 'finished'
     });
 
@@ -165,6 +168,7 @@ const InventoryManagement: React.FC = () => {
             currentStock: item.currentStock,
             minStockLevel: item.minStock || item.minStockLevel, // Handle variations if any
             maxStockLevel: item.maxStock || item.maxStockLevel,
+            price: item.price || item.costPrice || item.sellingPrice || 0,
             type: item.type
         });
         setShowAddModal(true);
@@ -206,6 +210,7 @@ const InventoryManagement: React.FC = () => {
                     currentStock: 0,
                     minStockLevel: 0,
                     maxStockLevel: 0,
+                    price: 0,
                     type: 'raw'
                 });
             } else {
@@ -323,7 +328,10 @@ const InventoryManagement: React.FC = () => {
     const stats = {
         totalItems: inventoryItems.length,
         lowStockItems: inventoryItems.filter(item => item.status === 'low').length,
-        totalValue: '₹12.5L',
+        totalValue: '₹' + inventoryItems.reduce((acc, item) => {
+            const price = item.price || item.costPrice || item.sellingPrice || 0;
+            return acc + (item.currentStock * price);
+        }, 0).toLocaleString(),
         reorderNeeded: inventoryItems.filter(item => item.currentStock < item.minStock).length
     };
 
@@ -362,6 +370,7 @@ const InventoryManagement: React.FC = () => {
                                 currentStock: 0,
                                 minStockLevel: 0,
                                 maxStockLevel: 0,
+                                price: 0,
                                 type: 'raw'
                             });
                             setShowAddModal(true);
@@ -386,6 +395,13 @@ const InventoryManagement: React.FC = () => {
                         className="hidden"
                     />
                     <button
+                        onClick={() => setShowTransferModal(true)}
+                        className="btn-secondary flex items-center gap-2"
+                    >
+                        <ArrowRightLeft className="h-4 w-4" />
+                        Transfer
+                    </button>
+                    <button
                         onClick={handleImportClick}
                         className="btn-secondary flex items-center gap-2"
                     >
@@ -406,13 +422,16 @@ const InventoryManagement: React.FC = () => {
                     <p className="text-gray-600 text-sm">Across all categories</p>
                 </div>
 
-                <div className="card p-6 border-red-200">
+                <div
+                    onClick={() => setLowStockFilter(!lowStockFilter)}
+                    className={`card p-6 border-red-200 cursor-pointer transition-all ${lowStockFilter ? 'ring-2 ring-red-500 shadow-md' : 'hover:shadow-md'}`}
+                >
                     <div className="flex items-center justify-between mb-4">
                         <AlertCircle className="h-8 w-8 text-red-500" />
                         <div className="text-2xl font-bold text-red-600">{stats.lowStockItems}</div>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-700">Low Stock Items</h3>
-                    <p className="text-gray-600 text-sm">Require immediate attention</p>
+                    <p className="text-gray-600 text-sm">Click to filter low stock</p>
                 </div>
 
                 <div className="card p-6">
@@ -642,71 +661,29 @@ const InventoryManagement: React.FC = () => {
             {/* ... (Existing Quick Actions code) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
 
-                <div className="card p-6 flex flex-col h-full">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Stock Transfer</h3>
-                    <div className="space-y-4 mb-6">
-                        <select
-                            className="input-field"
-                            value={transferData.itemId}
-                            onChange={(e) => setTransferData({ ...transferData, itemId: e.target.value })}
-                        >
-                            <option value="">Select Item</option>
-                            {inventoryItems.map(item => (
-                                <option key={item.id} value={item.id}>{item.name} ({item.currentStock})</option>
-                            ))}
-                        </select>
-                        <input
-                            type="number"
-                            placeholder="Quantity"
-                            className="input-field"
-                            value={transferData.quantity}
-                            onChange={(e) => setTransferData({ ...transferData, quantity: e.target.value })}
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                            <select
-                                className="input-field"
-                                value={transferData.from}
-                                onChange={(e) => setTransferData({ ...transferData, from: e.target.value })}
-                            >
-                                <option>Main Store</option>
-                                <option>Godown 1</option>
-                            </select>
-                            <select
-                                className="input-field"
-                                value={transferData.to}
-                                onChange={(e) => setTransferData({ ...transferData, to: e.target.value })}
-                            >
-                                <option>Assembly</option>
-                                <option>Packing</option>
-                            </select>
-                        </div>
-
-                        <button
-                            className="w-full btn-primary"
-                            onClick={handleTransfer}
-                        >
-                            Transfer Stock
-                        </button>
-                    </div>
-
-                    {/* Transaction History Section */}
-                    {transactions.length > 0 && (
-                        <div className="mt-auto pt-4 border-t border-gray-100">
-                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Recent Activity</h4>
-                            <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                                {transactions.map(tx => (
-                                    <div key={tx.id} className="text-xs bg-gray-50 p-2 rounded border border-gray-100">
-                                        <div className="flex justify-between font-medium text-gray-800">
-                                            <span>{tx.item}</span>
-                                            <span className="text-orange-600">-{tx.qty}</span>
-                                        </div>
-                                        <div className="flex justify-between text-gray-500 mt-1">
-                                            <span>{tx.to}</span>
-                                            <span>{tx.time}</span>
+                {/* Recent Activity Card */}
+                <div className="card p-6 border-blue-50">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Transactions</h3>
+                    {transactions.length > 0 ? (
+                        <div className="space-y-3 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                            {transactions.map(tx => (
+                                <div key={tx.id} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div>
+                                        <div className="font-medium text-gray-800">{tx.item}</div>
+                                        <div className="text-xs text-gray-500 mt-1">
+                                            {tx.from} <ArrowRightLeft className="inline w-3 h-3 mx-1" /> {tx.to}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="text-right">
+                                        <div className="font-bold text-orange-600">-{tx.qty}</div>
+                                        <div className="text-xs text-gray-400">{tx.time}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-400">
+                            <p>No recent transfers</p>
                         </div>
                     )}
                 </div>
@@ -807,6 +784,15 @@ const InventoryManagement: React.FC = () => {
                                 />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium mb-1">Price / Value (₹)</label>
+                                <input
+                                    type="number"
+                                    className="input-field"
+                                    value={newItem.price}
+                                    onChange={(e) => setNewItem({ ...newItem, price: Number(e.target.value) })}
+                                />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium mb-1">Category</label>
                                 <select
                                     className="input-field"
@@ -878,6 +864,80 @@ const InventoryManagement: React.FC = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* Transfer Modal */}
+            {showTransferModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg w-full max-w-md">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">Transfer Stock</h2>
+                            <button onClick={() => setShowTransferModal(false)} className="text-gray-500 hover:text-gray-700">×</button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Select Item</label>
+                                <select
+                                    className="input-field"
+                                    value={transferData.itemId}
+                                    onChange={(e) => setTransferData({ ...transferData, itemId: e.target.value })}
+                                >
+                                    <option value="">Choose Item...</option>
+                                    {inventoryItems.map(item => (
+                                        <option key={item.id} value={item.id}>{item.name} ({item.currentStock} {item.unit})</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Quantity</label>
+                                <input
+                                    type="number"
+                                    className="input-field"
+                                    placeholder="Enter quantity"
+                                    value={transferData.quantity}
+                                    onChange={(e) => setTransferData({ ...transferData, quantity: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">From</label>
+                                    <select
+                                        className="input-field"
+                                        value={transferData.from}
+                                        onChange={(e) => setTransferData({ ...transferData, from: e.target.value })}
+                                    >
+                                        <option>Main Store</option>
+                                        <option>Godown 1</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">To</label>
+                                    <select
+                                        className="input-field"
+                                        value={transferData.to}
+                                        onChange={(e) => setTransferData({ ...transferData, to: e.target.value })}
+                                    >
+                                        <option>Assembly Line 1</option>
+                                        <option>Assembly Line 2</option>
+                                        <option>Packing Area</option>
+                                        <option>Scrap</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button onClick={() => setShowTransferModal(false)} className="btn-secondary">Cancel</button>
+                                <button
+                                    onClick={() => {
+                                        handleTransfer();
+                                        setShowTransferModal(false);
+                                    }}
+                                    className="btn-primary"
+                                >
+                                    Confirm Transfer
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

@@ -294,6 +294,51 @@ export class EmailService {
         return Promise.all(promises);
     }
 
+    /**
+     * Send delivery status update email
+     */
+    async sendDeliveryUpdateEmail(data: {
+        invoiceNo: string;
+        customerName: string;
+        customerEmail?: string;
+        status: string;
+        updatedBy: string;
+        reason?: string;
+    }, adminEmails: string[]) {
+        const cssClasses: any = {
+            'delivered': 'delivered',
+            'failed': 'failed',
+            'out_for_delivery': 'shipped',
+            'assigned': 'shipped'
+        };
+
+        const templateData = {
+            invoiceNo: data.invoiceNo,
+            customerName: data.customerName,
+            status: data.status.replace(/_/g, ' ').toUpperCase(),
+            cssClass: cssClasses[data.status] || 'shipped',
+            updatedBy: data.updatedBy,
+            timestamp: new Date().toLocaleString(),
+            reason: data.reason,
+            showAction: true,
+            actionUrl: `${process.env.FRONTEND_URL}/billing`, // Or deep link if available
+            year: new Date().getFullYear()
+        };
+
+        const html = await this.loadTemplate('delivery-status', templateData);
+        const subject = `Delivery Update: Invoice #${data.invoiceNo} - ${data.status.toUpperCase()}`;
+
+        const promises = adminEmails.map(email =>
+            this.sendEmail(email, subject, html)
+        );
+
+        if (data.customerEmail) {
+            promises.push(this.sendEmail(data.customerEmail, subject, html));
+        }
+
+        return Promise.all(promises);
+    }
+
     private getDefaultTemplate(data: any): string {
         return `
       <!DOCTYPE html>

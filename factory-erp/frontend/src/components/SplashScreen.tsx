@@ -75,7 +75,7 @@ const SplashScreen: React.FC = () => {
             {/* Version & Footer */}
             <div className="absolute bottom-8 text-center">
                 <p className="text-gray-500 text-sm">Version 2.1.0</p>
-                <p className="text-gray-400 text-xs mt-1">© 2024 GSV Manufacturing. All rights reserved.</p>
+                <p className="text-gray-400 text-xs mt-1">© 2026 GSV Manufacturing. All rights reserved.</p>
             </div>
 
             {/* Animated Factory Elements */}

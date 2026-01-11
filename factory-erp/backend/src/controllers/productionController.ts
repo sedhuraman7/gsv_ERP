@@ -84,11 +84,67 @@ export const updateProductionStatus = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
+
+        let updateData: any = { status };
+
+        if (status === 'qa-check') {
+            // For QA, we keep the main status as 'in_production' 
+            // but move the current stage to 'testing'
+            updateData = {
+                status: 'in_production',
+                currentStage: 'testing'
+            };
+        } else if (status === 'in-progress' || status === 'in_production') {
+            updateData = {
+                status: 'in_production',
+                currentStage: 'psb_assembly' // Start at first stage
+            };
+        }
+
         const updatedOrder = await ProductionOrder.findByIdAndUpdate(
             id,
-            { status },
+            updateData,
             { new: true }
         );
+
+        // If status is changed to 'completed', update Finished Product Stock
+        if (status === 'completed' && updatedOrder) {
+            const { FinishedProduct } = await import('../models/Inventory');
+
+            // Calculate total good quantity
+            const goodQuantity = updatedOrder.producedQuantity || updatedOrder.quantityToProduce;
+
+            const product = await FinishedProduct.findByIdAndUpdate(
+                updatedOrder.finishedProductId,
+                {
+                    $inc: { 'stock.mainStore': goodQuantity }
+                },
+                { new: true }
+            );
+
+            if (product) {
+                const { StockMovement } = await import('../models/Inventory');
+                await StockMovement.create({
+                    referenceNo: updatedOrder.orderNo,
+                    date: new Date(),
+                    itemType: 'finished',
+                    itemId: product._id,
+                    itemCode: product.productCode,
+                    itemName: product.name,
+                    quantity: goodQuantity,
+                    unit: product.unit,
+                    fromLocation: 'packing_area',
+                    toLocation: 'main_store',
+                    movementType: 'production_receipt',
+                    issuedBy: updatedOrder.createdBy, // supervisor
+                    department: 'production',
+                    productionOrderId: updatedOrder._id,
+                    remarks: `Production Order Completed: ${updatedOrder.orderNo}`
+                });
+            }
+            console.log(`✅ Updated stock for ${updatedOrder.productName}: +${goodQuantity}`);
+        }
+
         res.status(200).json(updatedOrder);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
