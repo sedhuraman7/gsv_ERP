@@ -23,6 +23,8 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const AdminDashboard: React.FC = () => {
     const navigate = useNavigate();
     const [timeRange, setTimeRange] = useState('today');
@@ -31,7 +33,7 @@ const AdminDashboard: React.FC = () => {
 
     const fetchDashboardStats = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/dashboard');
+            const response = await fetch(`${API_BASE_URL}/api/dashboard`);
             if (response.ok) {
                 const data = await response.json();
                 setStatsData(data);
