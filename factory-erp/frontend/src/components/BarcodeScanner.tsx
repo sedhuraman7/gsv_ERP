@@ -59,7 +59,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
                 multiple: false
             },
             locate: true
-        }, (err) => {
+        }, (err: any) => {
             if (err) {
                 console.error("Scanner initialization failed:", err);
                 toast.error("Failed to initialize scanner");

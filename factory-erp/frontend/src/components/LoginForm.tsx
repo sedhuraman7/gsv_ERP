@@ -267,7 +267,7 @@ const LoginForm: React.FC = () => {
                         <p className="text-gray-600">Enter your credentials to access the system</p>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={hookFormHandleSubmit(onSubmit)} className="space-y-6">
                         {/* Role Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
