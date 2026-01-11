@@ -18,6 +18,8 @@ import {
     TrendingUp
 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const ProductionManagement: React.FC = () => {
     const [activeTab, setActiveTab] = useState('active');
     const [productionOrders, setProductionOrders] = useState<any[]>([]);
@@ -34,7 +36,7 @@ const ProductionManagement: React.FC = () => {
 
     const fetchProductionOrders = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/production');
+            const response = await fetch(`${API_BASE_URL}/api/production`);
             if (response.ok) {
                 const data = await response.json();
                 // Map backend data to frontend structure
@@ -59,7 +61,7 @@ const ProductionManagement: React.FC = () => {
 
     const handleUpdateStatus = async (id: string, newStatus: string) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/production/${id}/status`, {
+            const response = await fetch(`${API_BASE_URL}/api/production/${id}/status`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })
@@ -75,7 +77,7 @@ const ProductionManagement: React.FC = () => {
     const handleCreateOrder = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:5000/api/production', {
+            const response = await fetch(`${API_BASE_URL}/api/production`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...newOrder, status: 'planned', completed: 0 })

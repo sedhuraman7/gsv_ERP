@@ -19,6 +19,8 @@ import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import BarcodeScanner from '../components/BarcodeScanner';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const InventoryManagement: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -65,7 +67,8 @@ const InventoryManagement: React.FC = () => {
 
         try {
             // 1. Update Backend (Deduct Stock)
-            const response = await fetch(`http://localhost:5000/api/inventory/${item._id}`, {
+            // 1. Update Backend (Deduct Stock)
+            const response = await fetch(`${API_BASE_URL}/api/inventory/${item._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -105,7 +108,7 @@ const InventoryManagement: React.FC = () => {
 
     const fetchInventory = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/inventory');
+            const response = await fetch(`${API_BASE_URL}/api/inventory`);
             if (response.ok) {
                 const data = await response.json();
                 setInventoryItems(data);
@@ -124,7 +127,7 @@ const InventoryManagement: React.FC = () => {
         try {
             // Fetch all inventory related categories
             const types = 'raw_material,semi_finished,finished_product,spare_parts,consumables';
-            const response = await fetch(`http://localhost:5000/api/categories?type=${types}`);
+            const response = await fetch(`${API_BASE_URL}/api/categories?type=${types}`);
             if (response.ok) {
                 const data = await response.json();
                 // Extract unique category names
@@ -148,7 +151,7 @@ const InventoryManagement: React.FC = () => {
         if (!window.confirm(`Are you sure you want to delete ${item.name}?`)) return;
 
         try {
-            await fetch(`http://localhost:5000/api/inventory/${item._id}?type=${item.type}`, {
+            await fetch(`${API_BASE_URL}/api/inventory/${item._id}?type=${item.type}`, {
                 method: 'DELETE'
             });
             fetchInventory();
@@ -178,8 +181,8 @@ const InventoryManagement: React.FC = () => {
         e.preventDefault();
         try {
             const url = editingItem
-                ? `http://localhost:5000/api/inventory/${editingItem._id}`
-                : 'http://localhost:5000/api/inventory';
+                ? `${API_BASE_URL}/api/inventory/${editingItem._id}`
+                : `${API_BASE_URL}/api/inventory`;
 
             const method = editingItem ? 'PUT' : 'POST';
 
@@ -278,7 +281,7 @@ const InventoryManagement: React.FC = () => {
                     if (!payload.name) continue; // Skip empty rows
 
                     try {
-                        const response = await fetch('http://localhost:5000/api/inventory', {
+                        const response = await fetch(`${API_BASE_URL}/api/inventory`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)

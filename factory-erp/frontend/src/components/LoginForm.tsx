@@ -35,14 +35,35 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const LoginForm: React.FC = () => {
+    const navigate = useNavigate();
+    // Assuming useAuth is a custom hook that provides a login function
+    // This part of the code was not provided in the original document,
+    // so I'm commenting it out or assuming it's part of the user's setup.
+    // const { login } = useAuth(); 
+    const [isLogin, setIsLogin] = useState(true);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        role: 'admin',
+        employeeId: '',
+        department: ''
+    });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    // The original code used react-hook-form, but the provided snippet
+    // replaces it with a manual state management and handleSubmit.
+    // I will keep the react-hook-form setup for now and adapt the submit logic.
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
 
     const {
         register,
-        handleSubmit,
+        handleSubmit: hookFormHandleSubmit, // Renamed to avoid conflict
         formState: { errors },
         watch
     } = useForm<LoginFormData>({
@@ -54,14 +75,17 @@ const LoginForm: React.FC = () => {
 
     const selectedRole = watch('role');
 
+    // Adapting the new handleSubmit logic to work with react-hook-form's onSubmit
     const onSubmit = async (data: LoginFormData) => {
         setIsLoading(true);
+        setError(''); // Clear previous errors
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
+            const endpoint = '/api/auth/login'; // Always login for this form
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data) // Use data from react-hook-form
             });
 
             const result = await response.json();

@@ -17,6 +17,8 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const BillingSystem: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [invoices, setInvoices] = useState<any[]>([]);
@@ -45,7 +47,7 @@ const BillingSystem: React.FC = () => {
 
     const fetchInvoices = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/billing');
+            const response = await fetch(`${API_BASE_URL}/api/billing`);
             if (response.ok) {
                 const data = await response.json();
                 setInvoices(data);
@@ -70,7 +72,7 @@ const BillingSystem: React.FC = () => {
                 items: newInvoice.quantity
             };
 
-            const response = await fetch('http://localhost:5000/api/billing', {
+            const response = await fetch(`${API_BASE_URL}/api/billing`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -102,7 +104,7 @@ const BillingSystem: React.FC = () => {
 
     const fetchCustomers = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/customers');
+            const response = await fetch(`${API_BASE_URL}/api/customers`);
             if (response.ok) {
                 const data = await response.json();
                 setCustomers(data);
@@ -114,7 +116,7 @@ const BillingSystem: React.FC = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/inventory');
+            const response = await fetch(`${API_BASE_URL}/api/inventory`);
             if (response.ok) {
                 const data = await response.json();
                 // Filter only Finished Products for billing
@@ -131,7 +133,7 @@ const BillingSystem: React.FC = () => {
 
     const fetchDeliveryMen = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/auth/users?role=delivery_man'); // We might need this endpoint or a general users endpoint
+            const response = await fetch(`${API_BASE_URL}/api/auth/users?role=delivery_man`); // We might need this endpoint or a general users endpoint
             if (response.ok) {
                 const data = await response.json();
                 setDeliveryMen(data);
@@ -152,7 +154,7 @@ const BillingSystem: React.FC = () => {
             const userStr = localStorage.getItem('factory_user');
             const token = JSON.parse(userStr!).token;
 
-            const response = await fetch('http://localhost:5000/api/deliveries/assign', {
+            const response = await fetch(`${API_BASE_URL}/api/deliveries/assign`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
